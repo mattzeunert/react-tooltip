@@ -146,23 +146,14 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
       });
 
       body.addEventListener('mouseout', function (e) {
-        var elWithTooltip = e.target;
-
-        while (elWithTooltip.getAttribute('data-tip') === null) {
-          elWithTooltip = elWithTooltip.parentNode;
-          if (elWithTooltip.tagName === "HTML") {
-            return;
-          }
-        }
-
-        if (_this2.props.id && _this2.props.id !== elWithTooltip.getAttribute('data-for')) {
+        if (e.target.getAttribute('data-tip') === null) {
           return;
         }
 
-        e = {
-          target: elWithTooltip,
-          type: "mouseout"
-        };
+        if (_this2.props.id && _this2.props.id !== e.target.getAttribute('data-for')) {
+          return;
+        }
+
         _this2.boundHideTooltip(e);
       });
     }
@@ -392,8 +383,8 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
         });
       }
       // Set tooltip position
-      node.style.left = result.position.left + 'px';
-      node.style.top = result.position.top + 'px';
+      node.style.left = Math.ceil(result.position.left) + 'px';
+      node.style.top = Math.ceil(result.position.top) + 'px';
     }
 
     /**

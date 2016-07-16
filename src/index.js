@@ -114,23 +114,14 @@ class ReactTooltip extends Component {
     })
 
     body.addEventListener('mouseout', (e) => {
-        var elWithTooltip = e.target;
-
-        while (elWithTooltip.getAttribute('data-tip') === null) {
-            elWithTooltip = elWithTooltip.parentNode;
-            if (elWithTooltip.tagName === "HTML") {
-                return;
-            }
+        if (e.target.getAttribute('data-tip') === null) {
+            return;
         }
 
-        if (this.props.id && this.props.id !== elWithTooltip.getAttribute('data-for')) {
+        if (this.props.id && this.props.id !== e.target.getAttribute('data-for')) {
           return
         }
 
-        e = {
-            target: elWithTooltip,
-            type: "mouseout"
-        }
       this.boundHideTooltip(e)
     })
   }
@@ -316,8 +307,8 @@ class ReactTooltip extends Component {
       })
     }
     // Set tooltip position
-    node.style.left = result.position.left + 'px'
-    node.style.top = result.position.top + 'px'
+    node.style.left = Math.ceil(result.position.left) + 'px'
+    node.style.top = Math.ceil(result.position.top) + 'px'
   }
 
   /**
