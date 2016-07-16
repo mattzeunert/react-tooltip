@@ -354,10 +354,16 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
       currentTarget: null // Current target of mouse event
     };
 
+    _this.addBodyListeners();
+
     _this.mount = true;
     _this.delayShowLoop = null;
     _this.delayHideLoop = null;
     _this.intervalUpdateContent = null;
+
+    _this.boundShowTooltip = _this.showTooltip.bind(_this);
+    _this.boundUpdateTooltip = _this.updateTooltip.bind(_this);
+    _this.boundHideTooltip = _this.hideTooltip.bind(_this);
     return _this;
   }
 
@@ -379,30 +385,38 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
       this.removeScrollListener();
       this.unbindWindowEvents();
     }
-
-    /**
-     * Pick out corresponded target elements
-     */
-
   }, {
-    key: 'getTargetArray',
-    value: function getTargetArray(id) {
-      var targetArray = void 0;
+    key: 'addBodyListeners',
+    value: function addBodyListeners() {
+      var _this2 = this;
 
-      if (!id) {
-        targetArray = document.querySelectorAll('[data-tip]:not([data-for])');
-      } else {
-        targetArray = document.querySelectorAll('[data-tip][data-for="' + id + '"]');
-      }
+      var body = document.body;
+      body.addEventListener('mouseover', function (e) {
+        if (e.target.getAttribute('data-tip') === null) {
+          return;
+        }
 
-      // targetArray is a NodeList, convert it to a real array
-      // I hope I can use Object.values...
-      return Object.keys(targetArray).filter(function (key) {
-        return key !== 'length';
-      }).map(function (key) {
-        return targetArray[key];
+        if (_this2.props.id && _this2.props.id !== e.target.getAttribute('data-for')) {
+          return;
+        }
+
+        _this2.boundShowTooltip(e);
+      });
+
+      body.addEventListener('mouseout', function (e) {
+        if (e.target.getAttribute('data-tip') === null) {
+          return;
+        }
+
+        if (_this2.props.id && _this2.props.id !== e.target.getAttribute('data-for')) {
+          return;
+        }
+        _this2.boundHideTooltip(e);
       });
     }
+  }, {
+    key: 'removeBodyListeners',
+    value: function removeBodyListeners() {}
 
     /**
      * Bind listener to the target elements
@@ -411,43 +425,37 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
 
   }, {
     key: 'bindListener',
-    value: function bindListener() {
-      var _this2 = this;
+    value: function bindListener() {}
+    // const {id, globalEventOff} = this.props
+    // let targetArray = this.getTargetArray(id)
+    //
+    // targetArray.forEach(target => {
+    //   const isCaptureMode = this.isCapture(target)
+    //   if (target.getAttribute('currentItem') === null) {
+    //     target.setAttribute('currentItem', 'false')
+    //   }
+    //
+    //   if (this.isCustomEvent(target)) {
+    //     this.customBindListener(target)
+    //     return
+    //   }
+    //
+    //   target.removeEventListener('mouseenter', this.boundShowTooltip)
+    //   target.addEventListener('mouseenter', this.boundShowTooltip, isCaptureMode)
+    //
+    //   target.removeEventListener('mousemove', this.boundUpdateTooltip)
+    //   target.addEventListener('mousemove', this.boundUpdateTooltip, isCaptureMode)
+    //
+    //   target.removeEventListener('mouseleave', this.boundHideTooltip)
+    //   target.addEventListener('mouseleave', this.boundHideTooltip, isCaptureMode)
+    // })
+    //
+    // // Global event to hide tooltip
+    // if (globalEventOff) {
+    //   window.removeEventListener(globalEventOff, this.boundHideTooltip)
+    //   window.addEventListener(globalEventOff, this.boundHideTooltip, false)
+    // }
 
-      var _props = this.props;
-      var id = _props.id;
-      var globalEventOff = _props.globalEventOff;
-
-      var targetArray = this.getTargetArray(id);
-
-      targetArray.forEach(function (target) {
-        var isCaptureMode = _this2.isCapture(target);
-        if (target.getAttribute('currentItem') === null) {
-          target.setAttribute('currentItem', 'false');
-        }
-
-        if (_this2.isCustomEvent(target)) {
-          _this2.customBindListener(target);
-          return;
-        }
-
-        target.removeEventListener('mouseenter', _this2.showTooltip);
-        target.addEventListener('mouseenter', _this2.showTooltip.bind(_this2), isCaptureMode);
-        if (_this2.state.effect === 'float') {
-          target.removeEventListener('mousemove', _this2.updateTooltip);
-          target.addEventListener('mousemove', _this2.updateTooltip.bind(_this2), isCaptureMode);
-        }
-
-        target.removeEventListener('mouseleave', _this2.hideTooltip);
-        target.addEventListener('mouseleave', _this2.hideTooltip.bind(_this2), isCaptureMode);
-      });
-
-      // Global event to hide tooltip
-      if (globalEventOff) {
-        window.removeEventListener(globalEventOff, this.hideTooltip);
-        window.addEventListener(globalEventOff, this.hideTooltip.bind(this), false);
-      }
-    }
 
     /**
      * Unbind listeners on target elements
@@ -455,28 +463,23 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
 
   }, {
     key: 'unbindListener',
-    value: function unbindListener() {
-      var _this3 = this;
+    value: function unbindListener() {}
+    // const {id, globalEventOff} = this.props
+    // const targetArray = this.getTargetArray(id)
+    //
+    // targetArray.forEach(target => {
+    //   if (this.isCustomEvent(target)) {
+    //     this.customUnbindListener(target)
+    //     return
+    //   }
+    //
+    //   target.removeEventListener('mouseenter', this.boundShowTooltip)
+    //   target.removeEventListener('mousemove', this.boundUpdateTooltip)
+    //   target.removeEventListener('mouseleave', this.boundHideTooltip)
+    // })
+    //
+    // if (globalEventOff) window.removeEventListener(globalEventOff, this.boundHideTooltip)
 
-      var _props2 = this.props;
-      var id = _props2.id;
-      var globalEventOff = _props2.globalEventOff;
-
-      var targetArray = this.getTargetArray(id);
-
-      targetArray.forEach(function (target) {
-        if (_this3.isCustomEvent(target)) {
-          _this3.customUnbindListener(target);
-          return;
-        }
-
-        target.removeEventListener('mouseenter', _this3.showTooltip);
-        target.removeEventListener('mousemove', _this3.updateTooltip);
-        target.removeEventListener('mouseleave', _this3.hideTooltip);
-      });
-
-      if (globalEventOff) window.removeEventListener(globalEventOff, this.hideTooltip);
-    }
 
     /**
      * When mouse enter, show the tooltip
@@ -485,17 +488,17 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
   }, {
     key: 'showTooltip',
     value: function showTooltip(e) {
-      var _this4 = this;
+      var _this3 = this;
 
       // Get the tooltip content
       // calculate in this phrase so that tip width height can be detected
-      var _props3 = this.props;
-      var children = _props3.children;
-      var multiline = _props3.multiline;
-      var getContent = _props3.getContent;
+      var _props = this.props;
+      var children = _props.children;
+      var multiline = _props.multiline;
+      var getContent = _props.getContent;
 
-      var originTooltip = e.currentTarget.getAttribute('data-tip');
-      var isMultiline = e.currentTarget.getAttribute('data-multiline') || multiline || false;
+      var originTooltip = e.target.getAttribute('data-tip');
+      var isMultiline = e.target.getAttribute('data-multiline') || multiline || false;
 
       var content = children;
       if (getContent) {
@@ -510,25 +513,25 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
 
       this.setState({
         placeholder: placeholder,
-        place: e.currentTarget.getAttribute('data-place') || this.props.place || 'top',
-        type: e.currentTarget.getAttribute('data-type') || this.props.type || 'dark',
-        effect: e.currentTarget.getAttribute('data-effect') || this.props.effect || 'float',
-        offset: e.currentTarget.getAttribute('data-offset') || this.props.offset || {},
-        html: e.currentTarget.getAttribute('data-html') === 'true' || this.props.html || false,
-        delayShow: e.currentTarget.getAttribute('data-delay-show') || this.props.delayShow || 0,
-        delayHide: e.currentTarget.getAttribute('data-delay-hide') || this.props.delayHide || 0,
-        border: e.currentTarget.getAttribute('data-border') === 'true' || this.props.border || false,
-        extraClass: e.currentTarget.getAttribute('data-class') || this.props.class || ''
+        place: e.target.getAttribute('data-place') || this.props.place || 'top',
+        type: e.target.getAttribute('data-type') || this.props.type || 'dark',
+        effect: e.target.getAttribute('data-effect') || this.props.effect || 'float',
+        offset: e.target.getAttribute('data-offset') || this.props.offset || {},
+        html: e.target.getAttribute('data-html') === 'true' || this.props.html || false,
+        delayShow: e.target.getAttribute('data-delay-show') || this.props.delayShow || 0,
+        delayHide: e.target.getAttribute('data-delay-hide') || this.props.delayHide || 0,
+        border: e.target.getAttribute('data-border') === 'true' || this.props.border || false,
+        extraClass: e.target.getAttribute('data-class') || this.props.class || ''
       }, function () {
-        _this4.addScrollListener(e);
-        _this4.updateTooltip(e);
+        _this3.addScrollListener(e);
+        _this3.updateTooltip(e);
 
         if (getContent && Array.isArray(getContent)) {
-          _this4.intervalUpdateContent = setInterval(function () {
-            var getContent = _this4.props.getContent;
+          _this3.intervalUpdateContent = setInterval(function () {
+            var getContent = _this3.props.getContent;
 
             var placeholder = (0, _getTipContent2.default)(originTooltip, getContent[0](), isMultiline);
-            _this4.setState({
+            _this3.setState({
               placeholder: placeholder
             });
           }, getContent[1]);
@@ -543,7 +546,11 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
   }, {
     key: 'updateTooltip',
     value: function updateTooltip(e) {
-      var _this5 = this;
+      var _this4 = this;
+
+      if (e.type === 'mousemove' && this.state.effect === 'solid') {
+        return;
+      }
 
       var _state = this.state;
       var delayShow = _state.delayShow;
@@ -551,18 +558,18 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
       var placeholder = this.state.placeholder;
 
       var delayTime = show ? 0 : parseInt(delayShow, 10);
-      var eventTarget = e.currentTarget;
+      var eventTarget = e.target;
 
       clearTimeout(this.delayShowLoop);
       this.delayShowLoop = setTimeout(function () {
         if (typeof placeholder === 'string') placeholder = placeholder.trim();
         if (Array.isArray(placeholder) && placeholder.length > 0 || placeholder) {
-          _this5.setState({
+          _this4.setState({
             currentEvent: e,
             currentTarget: eventTarget,
             show: true
           }, function () {
-            _this5.updatePosition();
+            _this4.updatePosition();
           });
         }
       }, delayTime);
@@ -575,7 +582,7 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
   }, {
     key: 'hideTooltip',
     value: function hideTooltip() {
-      var _this6 = this;
+      var _this5 = this;
 
       var delayHide = this.state.delayHide;
 
@@ -584,10 +591,10 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
 
       this.clearTimer();
       this.delayHideLoop = setTimeout(function () {
-        _this6.setState({
+        _this5.setState({
           show: false
         });
-        _this6.removeScrollListener();
+        _this5.removeScrollListener();
       }, parseInt(delayHide, 10));
     }
 
@@ -600,12 +607,12 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
     key: 'addScrollListener',
     value: function addScrollListener(e) {
       var isCaptureMode = this.isCapture(e.currentTarget);
-      window.addEventListener('scroll', this.hideTooltip.bind(this), isCaptureMode);
+      window.addEventListener('scroll', this.boundHideTooltip, isCaptureMode);
     }
   }, {
     key: 'removeScrollListener',
     value: function removeScrollListener() {
-      window.removeEventListener('scroll', this.hideTooltip);
+      window.removeEventListener('scroll', this.boundHideTooltip);
     }
 
     // Calculation the position
@@ -613,7 +620,7 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
   }, {
     key: 'updatePosition',
     value: function updatePosition() {
-      var _this7 = this;
+      var _this6 = this;
 
       var _state2 = this.state;
       var currentEvent = _state2.currentEvent;
@@ -629,7 +636,7 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
       if (result.isNewState) {
         // Switch to reverse placement
         return this.setState(result.newState, function () {
-          _this7.updatePosition();
+          _this6.updatePosition();
         });
       }
       // Set tooltip position

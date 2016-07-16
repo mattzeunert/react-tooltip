@@ -61,7 +61,7 @@ class ReactTooltip extends Component {
       currentTarget: null // Current target of mouse event
     }
 
-    this.addBodyListeners();
+    this.addBodyListeners()
 
     this.mount = true
     this.delayShowLoop = null
@@ -90,31 +90,32 @@ class ReactTooltip extends Component {
   }
 
   addBodyListeners () {
-      var body = document.body
-      body.addEventListener("mouseover", (e) => {
-          if (e.target.getAttribute("data-tip") === null) {
-              return;
-          }
+    var body = document.body
+    body.addEventListener('mouseover', (e) => {
+      if (e.target.getAttribute('data-tip') === null) {
+        return
+      }
 
-          if (this.props.id && this.props.id !== e.target.getAttribute("data-for")) {
-              return;
-          }
+      if (this.props.id && this.props.id !== e.target.getAttribute('data-for')) {
+        return
+      }
 
-          this.boundShowTooltip(e);
-      })
-      body.addEventListener("mouseout", (e) => {
-          if (e.target.getAttribute("data-tip") === null) {
-              return;
-          }
+      this.boundShowTooltip(e)
+    })
 
-          if (this.props.id && this.props.id !== e.target.getAttribute("data-for")) {
-              return;
-          }
-          this.boundHideTooltip(e);
-      })
+    body.addEventListener('mouseout', (e) => {
+      if (e.target.getAttribute('data-tip') === null) {
+        return
+      }
+
+      if (this.props.id && this.props.id !== e.target.getAttribute('data-for')) {
+        return
+      }
+      this.boundHideTooltip(e)
+    })
   }
 
-  removeBodyListeners(){
+  removeBodyListeners () {
 
   }
 
