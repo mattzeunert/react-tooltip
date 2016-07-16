@@ -125,25 +125,44 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
 
       var body = document.body;
       body.addEventListener('mouseover', function (e) {
-        if (e.target.getAttribute('data-tip') === null) {
+        var elWithTooltip = e.target;
+
+        while (elWithTooltip.getAttribute('data-tip') === null) {
+          elWithTooltip = elWithTooltip.parentNode;
+          if (elWithTooltip.tagName === "HTML") {
+            return;
+          }
+        }
+
+        if (_this2.props.id && _this2.props.id !== elWithTooltip.getAttribute('data-for')) {
           return;
         }
 
-        if (_this2.props.id && _this2.props.id !== e.target.getAttribute('data-for')) {
-          return;
-        }
-
+        e = {
+          target: elWithTooltip,
+          type: "mouseover"
+        };
         _this2.boundShowTooltip(e);
       });
 
       body.addEventListener('mouseout', function (e) {
-        if (e.target.getAttribute('data-tip') === null) {
+        var elWithTooltip = e.target;
+
+        while (elWithTooltip.getAttribute('data-tip') === null) {
+          elWithTooltip = elWithTooltip.parentNode;
+          if (elWithTooltip.tagName === "HTML") {
+            return;
+          }
+        }
+
+        if (_this2.props.id && _this2.props.id !== elWithTooltip.getAttribute('data-for')) {
           return;
         }
 
-        if (_this2.props.id && _this2.props.id !== e.target.getAttribute('data-for')) {
-          return;
-        }
+        e = {
+          target: elWithTooltip,
+          type: "mouseout"
+        };
         _this2.boundHideTooltip(e);
       });
     }
@@ -339,7 +358,7 @@ var ReactTooltip = (0, _staticMethods2.default)(_class = (0, _windowListener2.de
   }, {
     key: 'addScrollListener',
     value: function addScrollListener(e) {
-      var isCaptureMode = this.isCapture(e.currentTarget);
+      var isCaptureMode = this.isCapture(e.target);
       window.addEventListener('scroll', this.boundHideTooltip, isCaptureMode);
     }
   }, {

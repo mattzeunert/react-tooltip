@@ -47,7 +47,7 @@ deployJS:
 	@echo Generating deploy JS files...
 	@$(NODE_BIN)/babel $(SRC) --out-dir $(DIST)
 
-deploy: lint
+deploy:
 	@echo Deploy...
 	@rm -rf dist && mkdir dist
 	@make convertCSS

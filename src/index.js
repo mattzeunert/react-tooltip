@@ -92,25 +92,45 @@ class ReactTooltip extends Component {
   addBodyListeners () {
     var body = document.body
     body.addEventListener('mouseover', (e) => {
-      if (e.target.getAttribute('data-tip') === null) {
+      var elWithTooltip = e.target;
+
+      while (elWithTooltip.getAttribute('data-tip') === null) {
+          elWithTooltip = elWithTooltip.parentNode;
+          if (elWithTooltip.tagName === "HTML") {
+              return;
+          }
+      }
+
+      if (this.props.id && this.props.id !== elWithTooltip.getAttribute('data-for')) {
         return
       }
 
-      if (this.props.id && this.props.id !== e.target.getAttribute('data-for')) {
-        return
-      }
 
+      e = {
+          target: elWithTooltip,
+          type: "mouseover"
+      }
       this.boundShowTooltip(e)
     })
 
     body.addEventListener('mouseout', (e) => {
-      if (e.target.getAttribute('data-tip') === null) {
-        return
-      }
+        var elWithTooltip = e.target;
 
-      if (this.props.id && this.props.id !== e.target.getAttribute('data-for')) {
-        return
-      }
+        while (elWithTooltip.getAttribute('data-tip') === null) {
+            elWithTooltip = elWithTooltip.parentNode;
+            if (elWithTooltip.tagName === "HTML") {
+                return;
+            }
+        }
+
+        if (this.props.id && this.props.id !== elWithTooltip.getAttribute('data-for')) {
+          return
+        }
+
+        e = {
+            target: elWithTooltip,
+            type: "mouseout"
+        }
       this.boundHideTooltip(e)
     })
   }
@@ -274,7 +294,7 @@ class ReactTooltip extends Component {
    * automatically hide the tooltip when scrolling
    */
   addScrollListener (e) {
-    const isCaptureMode = this.isCapture(e.currentTarget)
+    const isCaptureMode = this.isCapture(e.target)
     window.addEventListener('scroll', this.boundHideTooltip, isCaptureMode)
   }
 
