@@ -106,6 +106,10 @@ class ReactTooltip extends Component {
           if (e.target.getAttribute("data-tip") === null) {
               return;
           }
+
+          if (this.props.id && this.props.id !== e.target.getAttribute("data-for")) {
+              return;
+          }
           this.boundHideTooltip(e);
       })
   }
