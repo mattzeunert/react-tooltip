@@ -61,6 +61,8 @@ class ReactTooltip extends Component {
       currentTarget: null // Current target of mouse event
     }
 
+    this.addBodyListeners();
+
     this.mount = true
     this.delayShowLoop = null
     this.delayHideLoop = null
@@ -87,23 +89,29 @@ class ReactTooltip extends Component {
     this.unbindWindowEvents()
   }
 
-  /**
-   * Pick out corresponded target elements
-   */
-  getTargetArray (id) {
-    let targetArray
+  addBodyListeners () {
+      var body = document.body
+      body.addEventListener("mouseover", (e) => {
+          if (e.target.getAttribute("data-tip") === null) {
+              return;
+          }
 
-    if (!id) {
-      targetArray = document.querySelectorAll('[data-tip]:not([data-for])')
-    } else {
-      targetArray = document.querySelectorAll(`[data-tip][data-for="${id}"]`)
-    }
+          if (this.props.id && this.props.id !== e.target.getAttribute("data-for")) {
+              return;
+          }
 
-    // targetArray is a NodeList, convert it to a real array
-    // I hope I can use Object.values...
-    return Object.keys(targetArray).filter(key => key !== 'length').map(key => {
-      return targetArray[key]
-    })
+          this.boundShowTooltip(e);
+      })
+      body.addEventListener("mouseout", (e) => {
+          if (e.target.getAttribute("data-tip") === null) {
+              return;
+          }
+          this.boundHideTooltip(e);
+      })
+  }
+
+  removeBodyListeners(){
+
   }
 
   /**
@@ -111,56 +119,56 @@ class ReactTooltip extends Component {
    * These listeners used to trigger showing or hiding the tooltip
    */
   bindListener () {
-    const {id, globalEventOff} = this.props
-    let targetArray = this.getTargetArray(id)
-
-    targetArray.forEach(target => {
-      const isCaptureMode = this.isCapture(target)
-      if (target.getAttribute('currentItem') === null) {
-        target.setAttribute('currentItem', 'false')
-      }
-
-      if (this.isCustomEvent(target)) {
-        this.customBindListener(target)
-        return
-      }
-
-      target.removeEventListener('mouseenter', this.boundShowTooltip)
-      target.addEventListener('mouseenter', this.boundShowTooltip, isCaptureMode)
-
-      target.removeEventListener('mousemove', this.boundUpdateTooltip)
-      target.addEventListener('mousemove', this.boundUpdateTooltip, isCaptureMode)
-
-      target.removeEventListener('mouseleave', this.boundHideTooltip)
-      target.addEventListener('mouseleave', this.boundHideTooltip, isCaptureMode)
-    })
-
-    // Global event to hide tooltip
-    if (globalEventOff) {
-      window.removeEventListener(globalEventOff, this.hideTooltip)
-      window.addEventListener(globalEventOff, ::this.hideTooltip, false)
-    }
+    // const {id, globalEventOff} = this.props
+    // let targetArray = this.getTargetArray(id)
+    //
+    // targetArray.forEach(target => {
+    //   const isCaptureMode = this.isCapture(target)
+    //   if (target.getAttribute('currentItem') === null) {
+    //     target.setAttribute('currentItem', 'false')
+    //   }
+    //
+    //   if (this.isCustomEvent(target)) {
+    //     this.customBindListener(target)
+    //     return
+    //   }
+    //
+    //   target.removeEventListener('mouseenter', this.boundShowTooltip)
+    //   target.addEventListener('mouseenter', this.boundShowTooltip, isCaptureMode)
+    //
+    //   target.removeEventListener('mousemove', this.boundUpdateTooltip)
+    //   target.addEventListener('mousemove', this.boundUpdateTooltip, isCaptureMode)
+    //
+    //   target.removeEventListener('mouseleave', this.boundHideTooltip)
+    //   target.addEventListener('mouseleave', this.boundHideTooltip, isCaptureMode)
+    // })
+    //
+    // // Global event to hide tooltip
+    // if (globalEventOff) {
+    //   window.removeEventListener(globalEventOff, this.boundHideTooltip)
+    //   window.addEventListener(globalEventOff, this.boundHideTooltip, false)
+    // }
   }
 
   /**
    * Unbind listeners on target elements
    */
   unbindListener () {
-    const {id, globalEventOff} = this.props
-    const targetArray = this.getTargetArray(id)
-
-    targetArray.forEach(target => {
-      if (this.isCustomEvent(target)) {
-        this.customUnbindListener(target)
-        return
-      }
-
-      target.removeEventListener('mouseenter', this.boundShowTooltip)
-      target.removeEventListener('mousemove', this.boundUpdateTooltip)
-      target.removeEventListener('mouseleave', this.boundHideTooltip)
-    })
-
-    if (globalEventOff) window.removeEventListener(globalEventOff, this.boundHideTooltip)
+    // const {id, globalEventOff} = this.props
+    // const targetArray = this.getTargetArray(id)
+    //
+    // targetArray.forEach(target => {
+    //   if (this.isCustomEvent(target)) {
+    //     this.customUnbindListener(target)
+    //     return
+    //   }
+    //
+    //   target.removeEventListener('mouseenter', this.boundShowTooltip)
+    //   target.removeEventListener('mousemove', this.boundUpdateTooltip)
+    //   target.removeEventListener('mouseleave', this.boundHideTooltip)
+    // })
+    //
+    // if (globalEventOff) window.removeEventListener(globalEventOff, this.boundHideTooltip)
   }
 
   /**
@@ -170,8 +178,8 @@ class ReactTooltip extends Component {
     // Get the tooltip content
     // calculate in this phrase so that tip width height can be detected
     const {children, multiline, getContent} = this.props
-    const originTooltip = e.currentTarget.getAttribute('data-tip')
-    const isMultiline = e.currentTarget.getAttribute('data-multiline') || multiline || false
+    const originTooltip = e.target.getAttribute('data-tip')
+    const isMultiline = e.target.getAttribute('data-multiline') || multiline || false
 
     let content = children
     if (getContent) {
@@ -186,15 +194,15 @@ class ReactTooltip extends Component {
 
     this.setState({
       placeholder,
-      place: e.currentTarget.getAttribute('data-place') || this.props.place || 'top',
-      type: e.currentTarget.getAttribute('data-type') || this.props.type || 'dark',
-      effect: e.currentTarget.getAttribute('data-effect') || this.props.effect || 'float',
-      offset: e.currentTarget.getAttribute('data-offset') || this.props.offset || {},
-      html: e.currentTarget.getAttribute('data-html') === 'true' || this.props.html || false,
-      delayShow: e.currentTarget.getAttribute('data-delay-show') || this.props.delayShow || 0,
-      delayHide: e.currentTarget.getAttribute('data-delay-hide') || this.props.delayHide || 0,
-      border: e.currentTarget.getAttribute('data-border') === 'true' || this.props.border || false,
-      extraClass: e.currentTarget.getAttribute('data-class') || this.props.class || ''
+      place: e.target.getAttribute('data-place') || this.props.place || 'top',
+      type: e.target.getAttribute('data-type') || this.props.type || 'dark',
+      effect: e.target.getAttribute('data-effect') || this.props.effect || 'float',
+      offset: e.target.getAttribute('data-offset') || this.props.offset || {},
+      html: e.target.getAttribute('data-html') === 'true' || this.props.html || false,
+      delayShow: e.target.getAttribute('data-delay-show') || this.props.delayShow || 0,
+      delayHide: e.target.getAttribute('data-delay-hide') || this.props.delayHide || 0,
+      border: e.target.getAttribute('data-border') === 'true' || this.props.border || false,
+      extraClass: e.target.getAttribute('data-class') || this.props.class || ''
     }, () => {
       this.addScrollListener(e)
       this.updateTooltip(e)
@@ -222,7 +230,7 @@ class ReactTooltip extends Component {
     const {delayShow, show} = this.state
     let {placeholder} = this.state
     const delayTime = show ? 0 : parseInt(delayShow, 10)
-    const eventTarget = e.currentTarget
+    const eventTarget = e.target
 
     clearTimeout(this.delayShowLoop)
     this.delayShowLoop = setTimeout(() => {
